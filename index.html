@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List with Assignment</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --background-color: #ecf0f1;
+            --card-color: #ffffff;
+            --text-color: #34495e;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 0;
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 1rem;
+        }
+        h1 {
+            margin: 0;
+        }
+        main {
+            display: flex;
+            flex: 1;
+            padding: 2rem;
+            gap: 2rem;
+        }
+        .add-task, .task-list {
+            background-color: var(--card-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            flex: 1;
+        }
+        .add-task h2, .task-list h2 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+        input, button {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #27ae60;
+        }
+        #taskList {
+            list-style-type: none;
+            padding: 0;
+        }
+        .task-item {
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .task-info {
+            flex-grow: 1;
+        }
+        .task-title {
+            font-weight: bold;
+        }
+        .task-assignee {
+            font-size: 0.9em;
+            color: #666;
+        }
+        .remove-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .remove-btn:hover {
+            background-color: #c0392b;
+        }
+        @media (max-width: 768px) {
+            main {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>To-Do List</h1>
+    </header>
+    <main>
+        <section class="add-task">
+            <h2>Add New Task</h2>
+            <input type="text" id="taskInput" placeholder="Enter a task">
+            <input type="text" id="personInput" placeholder="Assign to (person)">
+            <button onclick="addTask()">Add Task</button>
+        </section>
+        <section class="task-list">
+            <h2>Tasks</h2>
+            <ul id="taskList">
+            </ul>
+        </section>
+    </main>
+    <script>
+        function addTask() {
+            const taskInput = document.getElementById("taskInput");
+            const personInput = document.getElementById("personInput");
+            const taskList = document.getElementById("taskList");
+
+            const taskText = taskInput.value.trim();
+            const personText = personInput.value.trim();
+
+            if (taskText === "" || personText === "") {
+                alert("Please enter both a task and a person.");
+                return;
+            }
+            const li = document.createElement("li");
+            li.className = "task-item";
+            li.innerHTML = `
+                <div class="task-info">
+                    <div class="task-title">${taskText}</div>
+                    <div class="task-assignee">Assigned to: ${personText}</div>
+                </div>
+                <button class="remove-btn" onclick="removeTask(this)">Remove</button>
+            `;
+
+            taskList.appendChild(li);
+
+            taskInput.value = "";
+            personInput.value = "";
+
+            saveTask(taskText, personText);
+        }
+        function removeTask(button) {
+            const li = button.parentElement;
+            const taskText = li.querySelector(".task-title").textContent;
+            li.remove();
+            removeTaskFromLocalStorage(taskText);
+        }
+        function saveTask(task, person) {
+            let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+            tasks.push({ task, person });
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+        }
+        function removeTaskFromLocalStorage(task) {
+            let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+            tasks = tasks.filter(t => t.task !== task);
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+        }
+        window.onload = function() {
+            const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+            const taskList = document.getElementById("taskList");
+
+            tasks.forEach(({ task, person }) => {
+                const li = document.createElement("li");
+                li.className = "task-item";
+                li.innerHTML = `
+                    <div class="task-info">
+                        <div class="task-title">${task}</div>
+                        <div class="task-assignee">Assigned to: ${person}</div>
+                    </div>
+                    <button class="remove-btn" onclick="removeTask(this)">Remove</button>
+                `;
+                taskList.appendChild(li);
+            });
+        }
+    </script>
+</body>
+</html>
